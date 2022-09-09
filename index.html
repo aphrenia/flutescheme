@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FLUTE SCHEME</title>
+    <style>
+      h2{
+        text-align:center;
+      }
+      p{
+        text-align:center;
+      }
+      button{
+        display: inline-block;
+        padding: 5px 15px;
+        border: none;
+        cursor: pointer;
+        background-color: #E9967A;
+        border-radius: 5px;
+      }
+      .button:hover{
+        background-color: #F5DEB3;
+      }
+      .header{
+        position: relative;
+        top: 100px;
+      }
+      .inputfield{
+        text-align:center;
+      }
+      .sequence{
+        text-align:center;
+      }
+      #noteinput{
+        height: 20px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="header">
+      <h2>CREATE FLUTE SCHEME</h2>
+      <p><br>Write the note sequence and click OK to show the flute scheme.</p>
+    <div>
+    <div class="inputfield">
+      <input style="width:300px" type="text" id="noteinput"></input>
+      <button onclick="drawFluteSequence()">OK</button>
+    </div>
+    <div class="sequence">
+      <canvas height=500 width=1100 id="flutecanvas"></canvas>
+    </div>
+
+    <script>
+
+      function noteArray(note){
+          var array = new Array();
+          if (note=="c"){
+              array = new Array(1, 1, 1, 1, 1, 1, 1, 1);
+            } else if (note=="d"){
+              array = new Array(1, 1, 1, 1, 1, 1, 1, 0);
+            } else if (note=="e"){
+              array = new Array(1, 1, 1, 1, 1, 1, 0, 0);
+            } else if (note=="f"){
+              array = new Array(1, 1, 1, 1, 1, 0, 1, 1);
+            } else if (note=="g"){
+              array = new Array(1, 1, 1, 1, 0, 0, 0, 0);
+            } else if (note=="a"){
+              array = new Array(1, 1, 1, 0, 0, 0, 0, 0);
+            } else if (note=="b"){
+              array = new Array(1, 1, 0, 0, 0, 0, 0, 0);
+            } else if (note=="c^"){
+              array = new Array(1, 0, 1, 0, 0, 0, 0, 0);
+            } else if (note=="d^"){
+              array = new Array(0, 1, 0, 0, 0, 0, 0, 0);
+            } else if (note=="e^"){
+              array = new Array(2, 1, 1, 1, 1, 1, 0, 0);
+            } else if (note=="f^"){
+              array = new Array(2, 1, 1, 1, 1, 0, 1, 0);
+            } else {
+              return;
+            }
+
+          return array;
+        }
+
+      function drawCircle(xpos, ypos, fill){
+        var c = document.getElementById("flutecanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.arc(xpos, ypos, 4, 0, 2 * Math.PI);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      function drawSemiCircle(xpos, ypos, fill){
+        var c = document.getElementById("flutecanvas");
+        var ctx = c.getContext("2d");
+        ctx.beginPath();
+        ctx.arc(xpos, ypos, 4, 0, Math.PI, false);
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(xpos, ypos, 4, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+
+      function drawFlute(xpos, note){
+          var ypos = 100;
+          var holes = noteArray(note);
+          var space = 20;
+
+          for (let i = 0, len = holes.length; i < len; i++){
+              if (holes[i] == 2){
+                drawSemiCircle(xpos, ypos, '#CD5C5C');
+              } else if (holes[i] == 1){
+                drawCircle(xpos, ypos, '#CD5C5C');
+              } else if (holes[i] == 0){
+                drawCircle(xpos, ypos, 'white');
+              }
+              ypos += space;
+              space = 10;
+          }
+      }
+
+      function drawFluteSequence(){
+          var notestring = document.getElementById("noteinput").value;
+          var notes = notestring.split(" ");
+          var xpos = 150;
+          for (let i = 0, len = notes.length; i < len; i++){
+              drawFlute(xpos, notes[i]);
+              xpos += 30;
+          }
+      }
+
+
+
+    </script>
+  </body>
+</html>
