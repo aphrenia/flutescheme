@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FLUTE SCHEME</title>
+    <title>FLUTE GRAPHICS</title>
     <style>
       h2{
         text-align:center;
@@ -40,8 +40,8 @@
   <body>
 
     <div class="header">
-      <h2>CREATE FLUTE SCHEME</h2>
-      <p><br>Write the note sequence and click OK to show the flute scheme.</p>
+      <h2>CREATE GRAPHIC FLUTE NOTE SEQUENCE</h2>
+      <p><br>Write the note sequence and click OK to show the graphic flute note sequence.</p>
     <div>
     <div class="inputfield">
       <input style="width:300px" type="text" id="noteinput"></input>
@@ -130,7 +130,7 @@
           var notes = notestring.split(" ");
           var xpos = 150;
           for (let i = 0, len = notes.length; i < len; i++){
-              drawFlute(xpos, notes[i]); 
+              drawFlute(xpos, notes[i]);
               xpos += 30;
           }
       }
