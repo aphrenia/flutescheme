@@ -17,7 +17,8 @@
         border: none;
         cursor: pointer;
         background-color: #E9967A;
-        border-radius: 5px;
+        border-radius: 2px;
+        color: Black;
       }
       .button:hover{
         background-color: #F5DEB3;
@@ -26,7 +27,7 @@
         position: relative;
         top: 70px;
       }
-      .inputfield{
+      .center{
         text-align:center;
       }
       .sequence{
@@ -51,7 +52,7 @@
       <h2>CREATE GRAPHIC FLUTE NOTE SEQUENCE</h2>
       <p><br>Type in the note sequence and click OK to show the graphic flute note sequence.</p>
     <div>
-    <div class="inputfield">
+    <div class="center">
       <input style="width:300px" type="text" id="noteinput"></input>
       <button onclick="clearFluteSequence();drawFluteSequence();">OK</button>
     </div>
@@ -61,10 +62,12 @@
     <div class="sequence">
       <canvas onclick="drawNotes(event);" height=80 width=800 id="sheet"></canvas>
     </div>
+    <div class="center">
+      <button onclick="clearFluteSequence()">CLEAR</button>
+    </div>
     <div class="sequence">
       <canvas height=250 width=1100 id="flutecanvas"></canvas>
     </div>
-
     <script>
 
       function noteArray(note){
@@ -166,10 +169,18 @@
       }
 
       function clearFluteSequence(){
+        clearFluteCanvas();
+        clearSheetCanvas();
+        notes = new NoteCollection();
+      }
+
+      function clearFluteCanvas(){
         var canvas = document.getElementById("flutecanvas");
         var ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
 
+      function clearSheetCanvas(){
         var sheetcanvas = document.getElementById("sheet");
         var ctxsheet = sheetcanvas.getContext("2d");
         ctxsheet.clearRect(0, 0, sheetcanvas.width, sheetcanvas.height);
@@ -212,12 +223,35 @@
         ctx.stroke();
       }
 
+      function drawNoteBetween(index, note){
+        if(index==0) notes.notes.unshift(note);
+        else notes.notes.splice(index, 0, note);
+        clearFluteCanvas();
+        for(let i=0; i<notes.length(); i++){
+          drawFlute(fluteChartXPos + 30*i, notes.notes[i].note);
+          addNoteLetter(fluteChartXPos + 30*i, notes.notes[i].note);
+        }
+      }
+
+      function removeNote(index, ctx){
+        clearSheetCanvas();
+        clearFluteCanvas();
+
+        if(index == 0) notes.notes.shift();
+        else notes.notes.splice(index, 1);
+
+        for(let j=0; j<notes.length(); j++){
+          notes.notes[j].draw(ctx);
+          drawFlute(fluteChartXPos + 30*j, notes.notes[j].note);
+          addNoteLetter(fluteChartXPos + 30*j, notes.notes[j].note);
+        }
+      }
+
       function drawNotes(e){
         canvas = document.getElementById("sheet");
         var ctx = canvas.getContext("2d");
         pos = getMousePos(canvas, e);
 
-        //TODO: Remove notes when clicked.
         //TODO: After adding notes in textfield, flutes should be removed when
         //notes are added by clicking.
 
@@ -225,36 +259,54 @@
         let noteIndex = allnotes.length - 1;
         let xpos = 150;
 
-        for(let i=0; i<11; i++){
-          if(pos.y < 22.5 + space && pos.y > 17.5 + space){
-            drawFlute(xpos + 30*notes.length(), allnotes[noteIndex]);
-            addNoteLetter(xpos + 30*notes.length(), allnotes[noteIndex]);
-            let note = new Note(pos.x, 20 + space);
-            note.draw(ctx);
-            notes.add(note);
-          }
-          space += 5;
-          noteIndex --;
+        //Removes note when clicked. Could be a separate function.
+        remove = false;
+        for(let i=0; i<notes.length(); i++){
+          if(Math.sqrt((notes.notes[i].xpos-pos.x)*(notes.notes[i].xpos-pos.x)
+            + (notes.notes[i].ypos-pos.y)*(notes.notes[i].ypos-pos.y)) < 3){
+              removeNote(i, ctx);
+              remove = true;
+            }
         }
 
-        notes.sort();
+        //Draws note if not an existing one is clicked.
+        if(!remove){
+          for(let i=0; i<11; i++){
+            if(pos.y < 22.5 + space && pos.y > 17.5 + space){
+              let note = new Note(pos.x, 20 + space, allnotes[noteIndex]);
+              note.draw(ctx);
+              betweenNote = false;
+              for(let i=0; i<notes.length(); i++){
+                if(pos.x < notes.notes[i].xpos){
+                  drawNoteBetween(i, note);
+                  betweenNote = true
+                  break;
+                }
+              }
+              if(!betweenNote){
+                drawFlute(xpos + 30*notes.length(), allnotes[noteIndex]);
+                addNoteLetter(xpos + 30*notes.length(), allnotes[noteIndex]);
+                notes.add(note);
+              }
+            }
+            space += 5;
+            noteIndex --;
+          }
+        }
       }
 
       class Note{
-        constructor(xpos, ypos){
+        constructor(xpos, ypos, note){
           this.xpos = xpos;
           this.ypos = ypos;
+          this.note = note;
         }
         draw(ctx){
           drawNote(this.xpos, this.ypos, ctx)
         }
-        remove(ctx){
-          //TODO: Remove function.
-        }
       }
 
       class NoteCollection{
-        //TODO: Sort after x position so that notes can be added not in order.
         constructor(){
           this.notes = new Array();
         }
@@ -264,12 +316,8 @@
         length(){
           return this.notes.length;
         }
-        sort(){
-          this.notes.sort(function (a, b) {
-            return a.xpos - b.xpos;
-          });
-        }
       }
+
 
       function highlightLines(e){
         canvas = document.getElementById("sheet");
@@ -287,6 +335,7 @@
       }
 
       drawSheet();
+      fluteChartXPos = 150;
       allnotes = ["C", "D", "E", "F", "A", "B", "C^",
                         "D^", "E^", "F^"];
       notes = new NoteCollection();
