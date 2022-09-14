@@ -24,7 +24,7 @@
       }
       .header{
         position: relative;
-        top: 100px;
+        top: 70px;
       }
       .inputfield{
         text-align:center;
@@ -35,58 +35,70 @@
       #noteinput{
         height: 20px;
       }
+      #circle{
+        position:absolute;
+        transform:translate(-50%,-50%);
+        height:5px;
+        width:5px;
+        border-radius:50%;
+        border:2px solid black;
+      }
     </style>
   </head>
   <body>
 
     <div class="header">
       <h2>CREATE GRAPHIC FLUTE NOTE SEQUENCE</h2>
-      <p><br>Write the note sequence and click OK to show the graphic flute note sequence.</p>
+      <p><br>Type in the note sequence and click OK to show the graphic flute note sequence.</p>
     <div>
     <div class="inputfield">
       <input style="width:300px" type="text" id="noteinput"></input>
-      <button onclick="drawFluteSequence()">OK</button>
+      <button onclick="clearFluteSequence();drawFluteSequence();">OK</button>
+    </div>
+    <div class="text">
+      <p><br>Or click to place the notes below.</p>
+    <div>
+    <div class="sequence">
+      <canvas onclick="drawNotes(event);" height=80 width=800 id="sheet"></canvas>
     </div>
     <div class="sequence">
-      <canvas height=500 width=1100 id="flutecanvas"></canvas>
+      <canvas height=250 width=1100 id="flutecanvas"></canvas>
     </div>
 
     <script>
 
       function noteArray(note){
           var array = new Array();
-          if (note=="c"){
+          if (note=="C"){
               array = new Array(1, 1, 1, 1, 1, 1, 1, 1);
-            } else if (note=="d"){
+            } else if (note=="D"){
               array = new Array(1, 1, 1, 1, 1, 1, 1, 0);
-            } else if (note=="e"){
+            } else if (note=="E"){
               array = new Array(1, 1, 1, 1, 1, 1, 0, 0);
-            } else if (note=="f"){
+            } else if (note=="F"){
               array = new Array(1, 1, 1, 1, 1, 0, 1, 1);
-            } else if (note=="g"){
+            } else if (note=="G"){
               array = new Array(1, 1, 1, 1, 0, 0, 0, 0);
-            } else if (note=="a"){
+            } else if (note=="A"){
               array = new Array(1, 1, 1, 0, 0, 0, 0, 0);
-            } else if (note=="b"){
+            } else if (note=="B"){
               array = new Array(1, 1, 0, 0, 0, 0, 0, 0);
-            } else if (note=="c^"){
+            } else if (note=="C^"){
               array = new Array(1, 0, 1, 0, 0, 0, 0, 0);
-            } else if (note=="d^"){
+            } else if (note=="D^"){
               array = new Array(0, 1, 0, 0, 0, 0, 0, 0);
-            } else if (note=="e^"){
+            } else if (note=="E^"){
               array = new Array(2, 1, 1, 1, 1, 1, 0, 0);
-            } else if (note=="f^"){
+            } else if (note=="F^"){
               array = new Array(2, 1, 1, 1, 1, 0, 1, 0);
             } else {
               return;
             }
-
           return array;
         }
 
-      function drawCircle(xpos, ypos, fill){
-        var c = document.getElementById("flutecanvas");
-        var ctx = c.getContext("2d");
+      function drawCircle(xpos, ypos, fill, canvas){
+        var ctx = canvas.getContext("2d");
         ctx.beginPath();
         ctx.arc(xpos, ypos, 4, 0, 2 * Math.PI);
         ctx.fillStyle = fill;
@@ -107,8 +119,16 @@
         ctx.stroke();
       }
 
+      function drawLine(x_from, y_from, x_to, y_to, ctx){
+        ctx.beginPath();
+        ctx.moveTo(x_from, y_from);
+        ctx.lineTo(x_to, y_to);
+        ctx.stroke();
+      }
+
       function drawFlute(xpos, note){
-          var ypos = 100;
+          var canvas = document.getElementById("flutecanvas");
+          var ypos = 50;
           var holes = noteArray(note);
           var space = 20;
 
@@ -116,26 +136,160 @@
               if (holes[i] == 2){
                 drawSemiCircle(xpos, ypos, '#CD5C5C');
               } else if (holes[i] == 1){
-                drawCircle(xpos, ypos, '#CD5C5C');
+                drawCircle(xpos, ypos, '#CD5C5C', canvas);
               } else if (holes[i] == 0){
-                drawCircle(xpos, ypos, 'white');
+                drawCircle(xpos, ypos, 'white', canvas);
               }
               ypos += space;
-              space = 10;
+              if (space==20) space = 10;
           }
+      }
+
+      function addNoteLetter(xpos, note){
+        var canvas = document.getElementById("flutecanvas");
+        var ctx = canvas.getContext("2d");
+        ctx.font = "15px serif";
+        ctx.fillStyle = "black";
+        ctx.fillText(note, xpos - 4, 170);
       }
 
       function drawFluteSequence(){
           var notestring = document.getElementById("noteinput").value;
-          var notes = notestring.split(" ");
+          if(notestring.includes(",")) var notes = notestring.split(", ");
+          else var notes = notestring.split(" ");
           var xpos = 150;
           for (let i = 0, len = notes.length; i < len; i++){
-              drawFlute(xpos, notes[i]);
+              drawFlute(xpos, notes[i].toUpperCase());
+              addNoteLetter(xpos, notes[i].toUpperCase());
               xpos += 30;
           }
       }
 
+      function clearFluteSequence(){
+        var canvas = document.getElementById("flutecanvas");
+        var ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        var sheetcanvas = document.getElementById("sheet");
+        var ctxsheet = sheetcanvas.getContext("2d");
+        ctxsheet.clearRect(0, 0, sheetcanvas.width, sheetcanvas.height);
+        drawSheet();
+      }
+
+      function drawSheet(){
+        var c = document.getElementById("sheet");
+        var ctx = c.getContext("2d");
+
+        var xpos = 50;
+        var ypos = 20;
+        const length = 700;
+        const space = 10;
+        for(let i=0; i<5; i++){
+          drawLine(xpos, ypos, xpos + length, ypos, ctx);
+          ypos += space;
+        }
+        ypos = 20;
+        for(let i=0; i<2; i++){
+          drawLine(xpos, ypos, xpos, ypos + 4*space, ctx);
+          xpos += length;
+        }
+      }
+
+      function noteCursor(e){
+
+        //TODO: Make this work together with onclick.
+
+        let circle = document.getElementById('circle');
+        circle.style.left = e.pageX - 10 + 'px';
+        circle.style.top = e.pageY - 120 + 'px';
+      }
+
+      function drawNote(xpos, ypos, ctx){
+        ctx.beginPath();
+        ctx.ellipse(xpos, ypos, 5, 4, - Math.PI / 8, 0, 2 * Math.PI);
+        ctx.fillStyle = 'black';
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      function drawNotes(e){
+        canvas = document.getElementById("sheet");
+        var ctx = canvas.getContext("2d");
+        pos = getMousePos(canvas, e);
+
+        //TODO: Remove notes when clicked.
+        //TODO: After adding notes in textfield, flutes should be removed when
+        //notes are added by clicking.
+
+        let space = 0;
+        let noteIndex = allnotes.length - 1;
+        let xpos = 150;
+
+        for(let i=0; i<11; i++){
+          if(pos.y < 22.5 + space && pos.y > 17.5 + space){
+            drawFlute(xpos + 30*notes.length(), allnotes[noteIndex]);
+            addNoteLetter(xpos + 30*notes.length(), allnotes[noteIndex]);
+            let note = new Note(pos.x, 20 + space);
+            note.draw(ctx);
+            notes.add(note);
+          }
+          space += 5;
+          noteIndex --;
+        }
+
+        notes.sort();
+      }
+
+      class Note{
+        constructor(xpos, ypos){
+          this.xpos = xpos;
+          this.ypos = ypos;
+        }
+        draw(ctx){
+          drawNote(this.xpos, this.ypos, ctx)
+        }
+        remove(ctx){
+          //TODO: Remove function.
+        }
+      }
+
+      class NoteCollection{
+        //TODO: Sort after x position so that notes can be added not in order.
+        constructor(){
+          this.notes = new Array();
+        }
+        add(note){
+          this.notes.push(note);
+        }
+        length(){
+          return this.notes.length;
+        }
+        sort(){
+          this.notes.sort(function (a, b) {
+            return a.xpos - b.xpos;
+          });
+        }
+      }
+
+      function highlightLines(e){
+        canvas = document.getElementById("sheet");
+        pos = getMousePos(canvas, e);
+
+        //TODO: Highlight lines when mouse hovers over them.
+      }
+
+      function getMousePos(canvas, evt) {
+          var rect = canvas.getBoundingClientRect();
+          return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+          };
+      }
+
+      drawSheet();
+      allnotes = ["C", "D", "E", "F", "A", "B", "C^",
+                        "D^", "E^", "F^"];
+      notes = new NoteCollection();
 
     </script>
   </body>
