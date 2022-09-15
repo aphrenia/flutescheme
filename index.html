@@ -6,7 +6,7 @@
     <title>FLUTE GRAPHICS</title>
     <style>
     body{
-      background: url(img/recorder2.png) no-repeat 78% 20%; fixed;
+      background: url(img/recorder2.png) no-repeat 78% 20% fixed;
       background-size: 550px;
     }
       h2{
@@ -36,6 +36,14 @@
       }
       .sequence{
         text-align:center;
+      }
+      @media screen and (max-width: 640px) {
+        #sheet{
+          width: 100%;
+        }
+        #flutecanvas{
+          width: 90%;
+        }
       }
       #noteinput{
         height: 20px;
@@ -70,7 +78,7 @@
       <button onclick="clearFluteSequence()">CLEAR</button>
     </div>
     <div class="sequence">
-      <canvas height=250 width=1100 id="flutecanvas"></canvas>
+      <canvas height=250 width=800 id="flutecanvas"></canvas>
     </div>
     <script>
 
@@ -107,7 +115,7 @@
       function drawCircle(xpos, ypos, fill, canvas){
         var ctx = canvas.getContext("2d");
         ctx.beginPath();
-        ctx.arc(xpos, ypos, 4, 0, 2 * Math.PI);
+        ctx.arc(xpos, ypos, 6, 0, 2 * Math.PI);
         ctx.fillStyle = fill;
         ctx.fill();
         ctx.stroke();
@@ -117,12 +125,12 @@
         var c = document.getElementById("flutecanvas");
         var ctx = c.getContext("2d");
         ctx.beginPath();
-        ctx.arc(xpos, ypos, 4, 0, Math.PI, false);
+        ctx.arc(xpos, ypos, 6, 0, Math.PI, false);
         ctx.closePath();
         ctx.fillStyle = fill;
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(xpos, ypos, 4, 0, 2 * Math.PI);
+        ctx.arc(xpos, ypos, 6, 0, 2 * Math.PI);
         ctx.stroke();
       }
 
@@ -137,7 +145,7 @@
           var canvas = document.getElementById("flutecanvas");
           var ypos = 50;
           var holes = noteArray(note);
-          var space = 20;
+          var space = 30;
 
           for (let i = 0, len = holes.length; i < len; i++){
               if (holes[i] == 2){
@@ -148,7 +156,7 @@
                 drawCircle(xpos, ypos, 'white', canvas);
               }
               ypos += space;
-              if (space==20) space = 10;
+              if (space==30) space = 15;
           }
       }
 
@@ -157,18 +165,18 @@
         var ctx = canvas.getContext("2d");
         ctx.font = "15px serif";
         ctx.fillStyle = "black";
-        ctx.fillText(note, xpos - 4, 170);
+        ctx.fillText(note, xpos - 4, 200);
       }
 
       function drawFluteSequence(){
           var notestring = document.getElementById("noteinput").value;
           if(notestring.includes(",")) var notes = notestring.split(", ");
           else var notes = notestring.split(" ");
-          var xpos = 150;
+          var xpos = fluteChartXPos;
           for (let i = 0, len = notes.length; i < len; i++){
               drawFlute(xpos, notes[i].toUpperCase());
               addNoteLetter(xpos, notes[i].toUpperCase());
-              xpos += 30;
+              xpos += 50;
           }
       }
 
@@ -261,7 +269,7 @@
 
         let space = 0;
         let noteIndex = allnotes.length - 1;
-        let xpos = 150;
+        let xpos = fluteChartXPos;
 
         //Removes note when clicked. Could be a separate function.
         remove = false;
@@ -339,7 +347,7 @@
       }
 
       drawSheet();
-      fluteChartXPos = 150;
+      fluteChartXPos = 10;
       allnotes = ["C", "D", "E", "F", "A", "B", "C^",
                         "D^", "E^", "F^"];
       notes = new NoteCollection();
